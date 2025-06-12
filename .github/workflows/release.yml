@@ -30,7 +30,7 @@ jobs:
           export LatestArmbianURL=https://github.com/armbian/build/archive/refs/tags/${LatestArmbianVer}.tar.gz
           echo LatestArmbianURL=$LatestArmbianURL
           wget "$LatestArmbianURL" -O${LatestArmbianVer}.tar.gz
-          tar xvf {LatestArmbianVer}.tar.gz
+          tar xvf ${LatestArmbianVer}.tar.gz
           ls
 
 
