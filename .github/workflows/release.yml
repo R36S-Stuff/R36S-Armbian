@@ -1,0 +1,46 @@
+# This is a basic workflow to help you get started with Actions
+
+name: release ArkBiaNix
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+          
+      - uses: actions/checkout@v4
+
+      - name: Build img
+        run: |
+          export LatestArmbian=$(gh release list -R armbian/build |grep -v trunk | head -n1 |cut -f1)
+          echo $LatestArmbian
+
+
+      # - name: Build img
+      #   run: |
+      #     export BuildImgEnv=github 
+      #     export UBootBuilderRepo=$(echo $GITHUB_REPOSITORY | cut -d/ -f1)
+      #     echo UBootBuilderRepo=${UBootBuilderRepo}
+      #     chmod a+x ./buildimg.sh ark rocknix armbian
+      #     ./buildimg.sh ark rocknix armbian
+      #     echo df -h /
+      #     df -h /
+      #     echo df end
+
+      # - name: Release
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     files: R36S-Multiboot-ark-rocknix-armbian-*.img.xz.7z.*
+      #     draft: true
