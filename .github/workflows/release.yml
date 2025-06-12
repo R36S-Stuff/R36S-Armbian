@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: release ArkBiaNix
+name: release Armbian
 on:
   workflow_dispatch:
 
@@ -26,6 +26,7 @@ jobs:
         run: |
           export LatestArmbian=$(gh release list -R armbian/build |grep -v trunk | head -n1 |cut -f1)
           echo $LatestArmbian
+          ls
 
 
       # - name: Build img
