@@ -29,8 +29,8 @@ jobs:
           export LatestArmbianVer=$(gh release list -R armbian/build |grep -v trunk | head -n1 |cut -f1)
           export LatestArmbianURL=https://github.com/armbian/build/archive/refs/tags/${LatestArmbianVer}.tar.gz
           echo LatestArmbianURL=$LatestArmbianURL
-          wget "$LatestArmbianURL" -O${LatestArmbianVer}.tar.gz
-          tar --strip-components=1 -xvf ${LatestArmbianVer}.tar.gz
+          wget -q -nv "$LatestArmbianURL" -O${LatestArmbianVer}.tar.gz
+          tar --strip-components=1 -xf ${LatestArmbianVer}.tar.gz
           ls
 
 
