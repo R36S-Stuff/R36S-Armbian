@@ -27,13 +27,7 @@ jobs:
         name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      - name: test
-        run: |
-          sudo apt install arch-test
-          arch-test
-          ls -la /proc/sys/fs/binfmt_misc/
-
-      - name: prep
+      - name: Prep
         run: |
           export LatestArmbianVer=$(gh release list -R armbian/build |grep -v trunk | head -n1 |cut -f1)
           export LatestArmbianURL=https://github.com/armbian/build/archive/refs/tags/${LatestArmbianVer}.tar.gz
@@ -43,18 +37,21 @@ jobs:
           rm -f ${LatestArmbianVer}.tar.gz
           mkdir release
 
-      - name: Build img
+      - name: Build imgs
         run: |
           for image in r36-bookworm-gnome r36-bookworm-xfce r36-noble-gnome r36-noble-xfce; do
           ./compile.sh ${image} || exit 1
           find output -name "*.img" -exec cp -vf {} release/armbian-${image}.img \;
           break
           done
-          ls release
           
+      - name: Zip imgs
+        run: |
+          find release -name "*.img" -exec xz -vz -T0 -1 {} \;
+          ls release
 
-      # - name: Release
-      #   uses: softprops/action-gh-release@v2
-      #   with:
-      #     files: R36S-Multiboot-ark-rocknix-armbian-*.img.xz.7z.*
-      #     draft: true
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/*.img.xz
+          draft: true
