@@ -11,16 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: true
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
+      # - name: Free Disk Space (Ubuntu)
+      #   uses: jlumbroso/free-disk-space@main
+      #   with:
+      #     tool-cache: true
+      #     android: true
+      #     dotnet: true
+      #     haskell: true
+      #     large-packages: true
+      #     docker-images: true
+      #     swap-storage: true
           
       - uses: actions/checkout@v4
 
@@ -37,8 +37,8 @@ jobs:
       - name: Build img
         run: |
           for image in r36-bookworm-gnome r36-bookworm-xfce r36-noble-gnome r36-noble-xfce; do
-          echo ./compile.sh $image || exit 1
-          echo find output -name "*.img" -exec cp -f {} release/
+          echo ./compile.sh ${image} || exit 1
+          find output -name "*.img" -exec echocp -f {} release/armbian-${image}.img
           done
           ls release
           
