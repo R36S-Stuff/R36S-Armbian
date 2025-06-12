@@ -3,6 +3,8 @@
 name: release Armbian
 on:
   workflow_dispatch:
+env:
+    GH_TOKEN: ${{ github.token }}
 
 jobs:
   build:
