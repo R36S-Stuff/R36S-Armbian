@@ -37,9 +37,8 @@ jobs:
       - name: Build img
         run: |
           for image in r36-bookworm-gnome r36-bookworm-xfce r36-noble-gnome r36-noble-xfce; do
-          ./compile.sh $image || exit 1
-          find output -name "*.img" -exec cp -f {} release/
-          break
+          echo ./compile.sh $image || exit 1
+          echo find output -name "*.img" -exec cp -f {} release/
           done
           ls release
           
