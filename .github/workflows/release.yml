@@ -48,6 +48,7 @@ jobs:
           for image in r36-bookworm-gnome r36-bookworm-xfce r36-noble-gnome r36-noble-xfce; do
           ./compile.sh ${image} || exit 1
           find output -name "*.img" -exec cp -vf {} release/armbian-${image}.img \;
+          break
           done
           ls release
           
