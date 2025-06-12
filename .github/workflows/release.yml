@@ -26,6 +26,7 @@ jobs:
 
       - name: test
         run: |
+          sudo apt install arch-test
           arch-test
           ls -la /proc/sys/fs/binfmt_misc/
 
