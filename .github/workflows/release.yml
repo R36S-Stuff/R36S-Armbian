@@ -24,23 +24,28 @@ jobs:
           
       - uses: actions/checkout@v4
 
-      - name: prep
+      - name: test
         run: |
-          export LatestArmbianVer=$(gh release list -R armbian/build |grep -v trunk | head -n1 |cut -f1)
-          export LatestArmbianURL=https://github.com/armbian/build/archive/refs/tags/${LatestArmbianVer}.tar.gz
-          echo LatestArmbianURL=$LatestArmbianURL
-          wget -q -nv "$LatestArmbianURL" -O${LatestArmbianVer}.tar.gz
-          tar --strip-components=1 -xf ${LatestArmbianVer}.tar.gz
-          rm -f ${LatestArmbianVer}.tar.gz
-          mkdir release
+          arch-test
+          ls -la /proc/sys/fs/binfmt_misc/
 
-      - name: Build img
-        run: |
-          for image in r36-bookworm-gnome r36-bookworm-xfce r36-noble-gnome r36-noble-xfce; do
-          ./compile.sh ${image} || exit 1
-          find output -name "*.img" -exec cp -vf {} release/armbian-${image}.img \;
-          done
-          ls release
+      # - name: prep
+      #   run: |
+      #     export LatestArmbianVer=$(gh release list -R armbian/build |grep -v trunk | head -n1 |cut -f1)
+      #     export LatestArmbianURL=https://github.com/armbian/build/archive/refs/tags/${LatestArmbianVer}.tar.gz
+      #     echo LatestArmbianURL=$LatestArmbianURL
+      #     wget -q -nv "$LatestArmbianURL" -O${LatestArmbianVer}.tar.gz
+      #     tar --strip-components=1 -xf ${LatestArmbianVer}.tar.gz
+      #     rm -f ${LatestArmbianVer}.tar.gz
+      #     mkdir release
+
+      # - name: Build img
+      #   run: |
+      #     for image in r36-bookworm-gnome r36-bookworm-xfce r36-noble-gnome r36-noble-xfce; do
+      #     ./compile.sh ${image} || exit 1
+      #     find output -name "*.img" -exec cp -vf {} release/armbian-${image}.img \;
+      #     done
+      #     ls release
           
 
       # - name: Release
