@@ -39,7 +39,9 @@ jobs:
 
       - name: Build imgs
         run: |
-          for image in r36-bookworm-gnome r36-bookworm-xfce r36-noble-gnome r36-noble-xfce; do
+          for image in  r36-bookworm-xfce r36-noble-xfce r36-bookworm-gnome r36-noble-gnome
+          do
+          #r36-bookworm-gnome r36-noble-gnome
           ./compile.sh ${image} || exit 1
           find output -name "*.img" -exec cp -vf {} release/armbian-${image}.img \;
           break
