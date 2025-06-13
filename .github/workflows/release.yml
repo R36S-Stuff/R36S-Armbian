@@ -21,6 +21,12 @@ jobs:
           large-packages: true
           docker-images: true
           swap-storage: true
+
+      - uses: thejerrybao/setup-swap-space@v1
+        with:
+          swap-space-path: /swapfile
+          swap-size-gb: 24
+          remove-existing-swap-files: true
           
       - uses: actions/checkout@v4
       -
