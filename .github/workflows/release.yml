@@ -25,8 +25,8 @@ jobs:
       - uses: thejerrybao/setup-swap-space@v1
         with:
           swap-space-path: /swapfile
-          swap-size-gb: 8
-          remove-existing-swap-files: true
+          swap-size-gb:  2
+          remove-existing-swap-files: false
           
       - uses: actions/checkout@v4
       -
