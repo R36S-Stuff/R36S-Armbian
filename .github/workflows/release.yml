@@ -45,7 +45,7 @@ jobs:
 
       - name: Build imgs
         run: |
-          for image in  r36-bookworm-xfce r36-noble-xfce r36-bookworm-gnome r36-noble-gnome
+          for image in  r36-bookworm-xfce r36-noble-xfce
           do
           #r36-bookworm-gnome r36-noble-gnome
           ./compile.sh ${image} || exit 1
