@@ -1,0 +1,137 @@
+#!/bin/bash
+
+
+
+# disable autologin
+rm -f /etc/systemd/system/getty@.service.d/override.conf
+rm -f /etc/systemd/system/serial-getty@.service.d/override.conf
+systemctl daemon-reload
+
+echo -e "\nWaiting for system to finish booting ..."
+systemctl is-system-running --wait > /dev/null
+
+if
+    systemctl is-enabled --quiet NetworkManager &&
+    ! systemctl is-enabled --quiet NetworkManager-wait-online
+then
+    systemctl enable NetworkManager-wait-online
+    # @TODO: determine if there is any value in starting it now
+    echo "Waiting for network startup to complete..."
+    systemctl start NetworkManager-wait-online
+fi
+
+if
+    systemctl is-enabled --quiet systemd-networkd &&
+    ! systemctl is-enabled --quiet systemd-networkd-wait-online
+then
+    systemctl enable systemd-networkd-wait-online
+    # @TODO: determine if there is any value in starting it now
+    echo "Waiting for network startup to complete..."
+    systemctl start systemd-networkd-wait-online
+fi
+
+chmod +x /etc/update-motd.d/*
+echo -e "\nWaiting for system to finish booting ..." setting stuffs
+
+[[ -f /boot/u-boot/firstrun_overrides.txt ]] && source /boot/u-boot/firstrun_overrides.txt
+# set root pass
+[[ -z "$rootpass" ]] && rootpass=r36s
+(
+    echo "$rootpass"
+    echo "$rootpass"
+) | passwd root > /dev/null 2>&1
+
+# make user
+[[ -z "$username" ]] && username=r36s
+[[ -z "$FancyUserName" ]] && FancyUserName=R36S
+adduser --quiet --disabled-password --home /home/"$username" --gecos "$FancyUserName" "$username"
+
+# set user pass
+[[ -z "$userpass" ]] && userpass=r36s
+(
+    echo "$userpass"
+    echo "$userpass"
+) | passwd "$username" > /dev/null 2>&1
+
+for additionalgroup in sudo netdev audio video disk tty users games dialout plugdev input bluetooth systemd-journal ssh render; do
+    usermod -aG "${additionalgroup}" "${RealUserName}" 2> /dev/null
+done
+RealUserName=$username
+touch /home/"$RealUserName"/.Xauthority
+chown "$RealUserName":"$RealUserName" /home/"$RealUserName"/.Xauthority
+RealName="$(awk -F":" "/^${RealUserName}:/ {print \$5}" < /etc/passwd | cut -d',' -f1)"
+[ -z "$RealName" ] && RealName="$RealUserName"
+echo -e "\nDear \e[0;92m${RealName}\x1B[0m, your account \e[0;92m${RealUserName}\x1B[0m has been created and is sudo enabled."
+echo -e "Please use this account for your daily work from now on.\n"
+rm -f /root/.not_logged_in_yet
+# set up profile sync daemon on desktop systems
+if command -v psd > /dev/null 2>&1; then
+    echo -e "${RealUserName} ALL=(ALL) NOPASSWD: /usr/bin/psd-overlay-helper" >> /etc/sudoers
+    touch /home/"${RealUserName}"/.activate_psd
+    chown "$RealUserName":"$RealUserName" /home/"${RealUserName}"/.activate_psd
+fi
+
+mkdir -p /etc/lightdm/lightdm.conf.d
+cat <<- EOF > /etc/lightdm/lightdm.conf.d/22-armbian-autologin.conf
+    [Seat:*]
+    autologin-user=$RealUserName
+    autologin-user-timeout=0
+    user-session=xfce
+EOF
+ln -sf /lib/systemd/system/lightdm.service /etc/systemd/system/display-manager.service
+
+# set wifi
+[[ -z "$ssid" ]] && ssid=WiFi
+[[ -z "$wifipass" ]] && wifipass=asuhdude
+WIFI_DEVICE=$(LC_ALL=C iw dev | awk '$1=="Interface"{print $2}' 2> /dev/null)
+
+# generate wifi config
+cat <<- EOF > /etc/netplan/30-wifis-dhcp.yaml
+# Created by Armbian firstlogin script
+network:
+    wifis:
+    ${WIFI_DEVICE}:
+        dhcp4: yes
+        dhcp6: yes
+        access-points:
+        "$ssid":
+            password: "${wifipass}"
+EOF
+chmod 600 /etc/netplan/30-wifis-dhcp.yaml
+
+# apply to netplan
+systemctl daemon-reload
+netplan apply --timeout 0 2>/dev/null
+
+# set timezone
+[[ -z "$timezone" ]] && timezone='America/New_York'
+timedatectl set-timezone "${timezone}"
+dpkg-reconfigure --frontend=noninteractive tzdata > /dev/null 2>&1
+
+# set locale
+[[ -z "$locale" ]] && locale=en_US.UTF-8
+sed -i "s/=.*/=$locale/g" /etc/default/locale
+sed -i "s/=.*/=en_US.UTF-8/g" /etc/default/locale
+
+
+#do armbian stuffs
+#reboot
+exit
+
+if [[ -f /var/run/resize2fs-reboot ]]; then
+    # Let the user reboot now otherwise start desktop environment
+    printf "\n\n\e[0;91mWarning: a reboot is needed to finish resizing the filesystem \x1B[0m \n"
+    printf "\e[0;91mPlease reboot the system now \x1B[0m \n\n"
+else
+    echo -e "\n\e[1m\e[39mNow starting desktop environment...\x1B[0m\n"
+    sleep 1
+    service lightdm start 2> /dev/null
+    if [ -f /root/.desktop_autologin ]; then
+        rm /root/.desktop_autologin
+    else
+        systemctl -q enable armbian-disable-autologin.timer
+        systemctl start armbian-disable-autologin.timer
+    fi
+    # logout if logged at console
+    who -la | grep root | grep -q tty1 && exit 1
+fi
