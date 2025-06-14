@@ -15,4 +15,4 @@ prep() {
 [[ ! -f compile.sh ]] && prep
 
 
-./compile.sh r36-bookworm-xfce
+./compile.sh r36s-bookworm-xfce
