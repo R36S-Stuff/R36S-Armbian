@@ -10,7 +10,9 @@ prep() {
     #mkdir release
 }
 
-[[ "$1" == "prep" ]] && prep || [[ ! -f compile.sh ]] && prep
+[[ "$1" == "prep" ]] && prep 
+[[ "$1" == "prep" ]] && exit 
+[[ ! -f compile.sh ]] && prep
 
 
 ./compile.sh r36-bookworm-xfce
