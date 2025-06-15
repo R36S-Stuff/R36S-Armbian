@@ -66,3 +66,4 @@ jobs:
           files: release/*.img.xz
           draft: true
           name: build ${{ github.run_id }}
+          tag_name: v${{ github.run_id }}
