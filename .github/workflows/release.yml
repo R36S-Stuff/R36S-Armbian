@@ -57,7 +57,7 @@ jobs:
           
       - name: Zip imgs
         run: |
-          find release -name "*.img" -exec xz -vz -T0 -1 {} \;
+          find release -name "*.img" -exec xz -vz -T0 -5 {} \;
           ls release
 
       - name: Release
