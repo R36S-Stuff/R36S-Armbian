@@ -8,19 +8,22 @@ env:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        version: [r36s-bookworm-xfce, r36s-noble-xfce, r36s-plucky-xfce, r36s-bookworm-minimal, r36s-noble-minimal, r36s-plucky-minimal]
     runs-on: ubuntu-latest
     steps:
 
-      - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: true
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
+      # - name: Free Disk Space (Ubuntu)
+      #   uses: jlumbroso/free-disk-space@main
+      #   with:
+      #     tool-cache: true
+      #     android: true
+      #     dotnet: true
+      #     haskell: true
+      #     large-packages: true
+      #     docker-images: true
+      #     swap-storage: true
 
       - uses: thejerrybao/setup-swap-space@v1
         with:
@@ -45,12 +48,12 @@ jobs:
 
       - name: Build imgs
         run: |
-          for image in  r36-bookworm-xfce r36-noble-xfce
-          do
-          #r36-bookworm-gnome r36-noble-gnome
+          #for image in r36s-bookworm-xfce r36s-noble-xfce
+          #do
+          image=${{ matrix.version }}
           ./compile.sh ${image} || exit 1
           find output -name "*.img" -exec cp -vf {} release/armbian-${image}.img \;
-          done
+          #done
           
       - name: Zip imgs
         run: |
@@ -62,3 +65,5 @@ jobs:
         with:
           files: release/*.img.xz
           draft: true
+          name: build ${{ github.run_id }}
+          tag_name: v${{ github.run_id }}
