@@ -20,6 +20,6 @@
 !userpatches
 !userpatches/rk3326-firstlogins
 !userpatches/rk3326-firstlogins/armbian-firstlogin.r36s
-!userpatches/config-r36s-bookworm-xfce.conf
+!userpatches/config-r36s-*.conf
 !README.md
 !mkimage.sh

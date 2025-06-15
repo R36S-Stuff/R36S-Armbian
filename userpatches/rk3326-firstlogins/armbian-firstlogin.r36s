@@ -117,21 +117,7 @@ sed -i 's/# '"${locale}"'/'"${locale}"'/' /etc/locale.gen
 echo -e "Generating locales: \x1B[92m${locale}\x1B[0m"
 locale-gen "${locale}" > /dev/null 2>&1
 
-DevPart=$(blkid |grep armbian |cut -d: -f1)
-PartNum=$(echo ${DevPart} | cut -dp -f2)
-Dev=$(echo ${DevPart} | cut -dp -f1)
-
-if [[ -f /boot/u-boot/dontexpand ]]
-then
-    rm -f /boot/u-boot/dontexpand
-else
-    DevPart=$(blkid |grep armbian |cut -d: -f1)
-    PartNum=$(echo ${DevPart} | cut -dp -f2)
-    Dev=$(echo ${DevPart} | cut -dp -f1)
-    parted --script --fix $Dev resizepart $PartNum 100%
-    resize2fs -f $DevPart
-    reboot
-fi
+[[ -f /var/run/resize2fs-reboot]] && reboot
 
 echo -e "\n\e[1m\e[39mNow starting desktop environment...\x1B[0m\n"
 sleep 1
