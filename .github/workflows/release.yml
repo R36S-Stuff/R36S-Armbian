@@ -65,3 +65,4 @@ jobs:
         with:
           files: release/*.img.xz
           draft: true
+          name: build ${{ github.run_id }}
