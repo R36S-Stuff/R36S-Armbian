@@ -34,6 +34,7 @@ chmod +x /etc/update-motd.d/*
 echo -e "\nWaiting for system to finish booting ..." setting stuffs
 
 [[ -f /boot/u-boot/firstrun_overrides.txt ]] && source /boot/u-boot/firstrun_overrides.txt
+
 # set root pass
 [[ -z "$rootpass" ]] && rootpass=r36s
 (
@@ -53,10 +54,12 @@ adduser --quiet --disabled-password --home /home/"$username" --gecos "$FancyUser
     echo "$userpass"
 ) | passwd "$username" > /dev/null 2>&1
 
+RealUserName=$username
+
 for additionalgroup in sudo netdev audio video disk tty users games dialout plugdev input bluetooth systemd-journal ssh render; do
     usermod -aG "${additionalgroup}" "${RealUserName}" 2> /dev/null
 done
-RealUserName=$username
+
 touch /home/"$RealUserName"/.Xauthority
 chown "$RealUserName":"$RealUserName" /home/"$RealUserName"/.Xauthority
 RealName="$(awk -F":" "/^${RealUserName}:/ {print \$5}" < /etc/passwd | cut -d',' -f1)"
@@ -85,17 +88,16 @@ ln -sf /lib/systemd/system/lightdm.service /etc/systemd/system/display-manager.s
 [[ -z "$wifipass" ]] && wifipass=asuhdude
 WIFI_DEVICE=$(LC_ALL=C iw dev | awk '$1=="Interface"{print $2}' 2> /dev/null)
 
-# generate wifi config
 cat <<- EOF > /etc/netplan/30-wifis-dhcp.yaml
 # Created by Armbian firstlogin script
 network:
-    wifis:
+  wifis:
     ${WIFI_DEVICE}:
-        dhcp4: yes
-        dhcp6: yes
-        access-points:
+      dhcp4: yes
+      dhcp6: yes
+      access-points:
         "$ssid":
-            password: "${wifipass}"
+         password: "${wifipass}"
 EOF
 chmod 600 /etc/netplan/30-wifis-dhcp.yaml
 
@@ -111,27 +113,29 @@ dpkg-reconfigure --frontend=noninteractive tzdata > /dev/null 2>&1
 # set locale
 [[ -z "$locale" ]] && locale=en_US.UTF-8
 sed -i "s/=.*/=$locale/g" /etc/default/locale
-sed -i "s/=.*/=en_US.UTF-8/g" /etc/default/locale
+sed -i 's/# '"${locale}"'/'"${locale}"'/' /etc/locale.gen
+echo -e "Generating locales: \x1B[92m${locale}\x1B[0m"
+locale-gen "${locale}" > /dev/null 2>&1
 
+DevPart=$(blkid |grep armbian |cut -d: -f1)
+PartNum=$(echo ${DevPart} | cut -dp -f2)
+Dev=$(echo ${DevPart} | cut -dp -f1)
 
-#do armbian stuffs
-#reboot
-exit
-
-if [[ -f /var/run/resize2fs-reboot ]]; then
-    # Let the user reboot now otherwise start desktop environment
-    printf "\n\n\e[0;91mWarning: a reboot is needed to finish resizing the filesystem \x1B[0m \n"
-    printf "\e[0;91mPlease reboot the system now \x1B[0m \n\n"
+if [[ -f /boot/u-boot/dontexpand ]]
+then
+    rm -f /boot/u-boot/dontexpand
 else
-    echo -e "\n\e[1m\e[39mNow starting desktop environment...\x1B[0m\n"
-    sleep 1
-    service lightdm start 2> /dev/null
-    if [ -f /root/.desktop_autologin ]; then
-        rm /root/.desktop_autologin
-    else
-        systemctl -q enable armbian-disable-autologin.timer
-        systemctl start armbian-disable-autologin.timer
-    fi
-    # logout if logged at console
-    who -la | grep root | grep -q tty1 && exit 1
+    DevPart=$(blkid |grep armbian |cut -d: -f1)
+    PartNum=$(echo ${DevPart} | cut -dp -f2)
+    Dev=$(echo ${DevPart} | cut -dp -f1)
+    parted --script --fix $Dev resizepart $PartNum 100%
+    resize2fs -f $DevPart
+    reboot
 fi
+
+echo -e "\n\e[1m\e[39mNow starting desktop environment...\x1B[0m\n"
+sleep 1
+service lightdm start 2> /dev/null
+who -la | grep root | grep -q tty1 && exit 1
+
+exit 0

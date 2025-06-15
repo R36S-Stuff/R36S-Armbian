@@ -8,11 +8,11 @@ prep() {
     tar --strip-components=1 --exclude=.gitignore --exclude=.git --exclude=README.md -xf ${LatestArmbianVer}.tar.gz
     rm -f ${LatestArmbianVer}.tar.gz
     #mkdir release
+    [[ "$1" == "prep" ]] && exit 
 }
 
 [[ "$1" == "prep" ]] && prep 
-[[ "$1" == "prep" ]] && exit 
-[[ ! -f compile.sh ]] && prep
 
+[[ ! -f "compile.sh" ]] && prep
 
 ./compile.sh r36s-bookworm-xfce
