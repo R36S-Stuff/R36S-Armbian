@@ -18,8 +18,8 @@
 !config/kernel
 !config/kernel/linux-rk3326-lts.config
 !userpatches
-!userpatches/rk3326-firstlogins
-!userpatches/rk3326-firstlogins/armbian-firstlogin.r36s
+!userpatches/rk3326
+!userpatches/rk3326/**  
 !userpatches/config-r36s-*.conf
 !README.md
 !mkimage.sh
