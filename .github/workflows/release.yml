@@ -8,6 +8,9 @@ env:
 
 jobs:
   build:
+    strategy:
+      matrix:
+        version: [r36-bookworm-xfce, r36-noble-xfce, r36-plucky-xfce, r36-bookworm-minimal, r36-noble-minimal, r36-plucky-minimal]
     runs-on: ubuntu-latest
     steps:
 
@@ -45,12 +48,13 @@ jobs:
 
       - name: Build imgs
         run: |
-          for image in  r36-bookworm-xfce r36-noble-xfce
-          do
+          #for image in  r36-bookworm-xfce r36-noble-xfce
+          #do
           #r36-bookworm-gnome r36-noble-gnome
+          image=${{ matrix.version }}
           ./compile.sh ${image} || exit 1
           find output -name "*.img" -exec cp -vf {} release/armbian-${image}.img \;
-          done
+          #done
           
       - name: Zip imgs
         run: |
