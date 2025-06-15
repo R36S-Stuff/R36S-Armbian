@@ -44,7 +44,7 @@ echo -e "\nWaiting for system to finish booting ..." setting stuffs
 
 # make user
 [[ -z "$username" ]] && username=r36s
-[[ -z "$FancyUserName" ]] && FancyUserName=R36S
+[[ -z "$FancyUserName" ]] && [[ "$username" == "r36s" ]] && FancyUserName=R36S
 adduser --quiet --disabled-password --home /home/"$username" --gecos "$FancyUserName" "$username"
 
 # set user pass
@@ -117,7 +117,7 @@ sed -i 's/# '"${locale}"'/'"${locale}"'/' /etc/locale.gen
 echo -e "Generating locales: \x1B[92m${locale}\x1B[0m"
 locale-gen "${locale}" > /dev/null 2>&1
 
-[[ -f /var/run/resize2fs-reboot]] && reboot
+[[ -f /var/run/resize2fs-reboot ]] && reboot
 
 echo -e "\n\e[1m\e[39mNow starting desktop environment...\x1B[0m\n"
 sleep 1

@@ -1,0 +1,6 @@
+rootpass=r36s
+FancyUserName=R36S
+username=r36s
+userpass=r36s
+ssid=WiFi
+wifipass=asuhdude
