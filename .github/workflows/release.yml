@@ -11,6 +11,7 @@ jobs:
     strategy:
       matrix:
         version: [r36s-bookworm-xfce, r36s-noble-xfce, r36s-plucky-xfce, r36s-bookworm-minimal, r36s-noble-minimal, r36s-plucky-minimal]
+      fail-fast: false
     runs-on: ubuntu-latest
     steps:
 
@@ -28,7 +29,7 @@ jobs:
       - uses: thejerrybao/setup-swap-space@v1
         with:
           swap-space-path: /swapfile
-          swap-size-gb:  5
+          swap-size-gb:  7
           remove-existing-swap-files: false
           
       - uses: actions/checkout@v4
@@ -51,6 +52,7 @@ jobs:
           #for image in r36s-bookworm-xfce r36s-noble-xfce
           #do
           image=${{ matrix.version }}
+          sleep $(( RANDOM % 300 ))
           ./compile.sh ${image} || exit 1
           find output -name "*.img" -exec cp -vf {} release/armbian-${image}.img \;
           #done
