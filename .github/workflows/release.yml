@@ -51,6 +51,7 @@ jobs:
           #for image in r36s-bookworm-xfce r36s-noble-xfce
           #do
           image=${{ matrix.version }}
+          sleep $(( RANDOM % 300 ))
           ./compile.sh ${image} || exit 1
           find output -name "*.img" -exec cp -vf {} release/armbian-${image}.img \;
           #done
