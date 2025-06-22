@@ -33,6 +33,7 @@ fi
 chmod +x /etc/update-motd.d/*
 echo -e "\nWaiting for system to finish booting ..." setting stuffs
 
+[[ -f /boot/u-boot/firstrun_overrides.txt ]] && dos2unix /boot/u-boot/firstrun_overrides.txt
 [[ -f /boot/u-boot/firstrun_overrides.txt ]] && source /boot/u-boot/firstrun_overrides.txt
 
 # set root pass
