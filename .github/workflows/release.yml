@@ -7,6 +7,15 @@ env:
     GH_TOKEN: ${{ github.token }}
 
 jobs:
+  get_build_date:
+    runs-on: ubuntu-latest
+    outputs:
+      build_date: ${{ steps.set_date.outputs.date }}
+    steps:
+      - name: Set build date
+        id: set_date
+        run: echo "date=$(date +%Y-%m-%d-%H%M%S)" >> $GITHUB_OUTPUT # Generates date in YYYY-MM-DD format and sets it as an output
+
   build:
     strategy:
       matrix:
@@ -56,7 +65,7 @@ jobs:
           
       - name: Zip imgs
         run: |
-          find release -name "*.img" -exec xz -vz -T0 -5 {} \;
+          find release -name "*.img" -exec xz -vz -T0 -1 {} \;
           ls release
 
       - name: Release
@@ -64,5 +73,5 @@ jobs:
         with:
           files: release/*.img.xz
           draft: true
-          name: build ${{ github.run_number }}
+          name: build ${{ github.run_number }}-${{ needs.get_build_date.outputs.build_date }}
           tag_name: v${{ github.run_number }}
