@@ -1,25 +1,2 @@
-*
-# !config/boards/r36s*
-# !config/sources/families/rk3326*
-# !userpatches/
-# !userpatches/rk3326-firstlogins/
-# !userpatches/rk3326-firstlogins/*
-# !userpatches/config-r36s-*.conf
-# !config/kernel/linux-rk3326-lts.config
-# !mkimage.sh
-
-!.gitignore
-!config
-!config/sources
-!config/sources/families
-!config/sources/families/rk3326.conf
-!config/boards
-!config/boards/r36s.csc
-!config/kernel
-!config/kernel/linux-rk3326-lts.config
-!userpatches
-!userpatches/rk3326
-!userpatches/rk3326/**  
-!userpatches/config-r36s-*.conf
-!README.md
-!mkimage.sh
+localbuild/
+localoutput/
