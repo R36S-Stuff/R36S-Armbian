@@ -24,8 +24,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: get_build_date
     steps:
-      - env:
-          releasedate: ${{needs.get_build_date.outputs.build_date}}
 
       # - name: Free Disk Space (Ubuntu)
       #   uses: jlumbroso/free-disk-space@main
