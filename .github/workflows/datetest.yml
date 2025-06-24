@@ -1,0 +1,80 @@
+# This is a basic workflow to help you get started with Actions
+
+name: release Armbian
+on:
+  workflow_dispatch:
+env:
+    GH_TOKEN: ${{ github.token }}
+
+jobs:
+  get_build_date:
+    runs-on: ubuntu-latest
+    outputs:
+      build_date: ${{ steps.set_date.outputs.date }}
+    steps:
+      - name: Set build date
+        id: set_date
+        run: echo "date=$(date +%Y-%m-%d-%H%M%S)" >> $GITHUB_OUTPUT # Generates date in YYYY-MM-DD format and sets it as an output
+
+  build:
+    strategy:
+      matrix:
+        version: [r36s-bookworm-minimal, r36s-jammy-minimal, r36s-noble-minimal, r36s-plucky-minimal, r36s-bookworm-xfce, r36s-jammy-xfce, r36s-noble-xfce, r36s-plucky-xfce]
+      fail-fast: false
+    runs-on: ubuntu-latest
+    needs: get_build_date
+    steps:
+      - env:
+          releasedate: ${{needs.get_build_date.outputs.build_date}}
+
+      # - name: Free Disk Space (Ubuntu)
+      #   uses: jlumbroso/free-disk-space@main
+      #   with:
+      #     tool-cache: true
+      #     android: true
+      #     dotnet: true
+      #     haskell: true
+      #     large-packages: true
+      #     docker-images: true
+      # #     swap-storage: true
+
+      # - uses: thejerrybao/setup-swap-space@v1
+      #   with:
+      #     swap-space-path: /swapfile
+      #     swap-size-gb:  8
+      #     remove-existing-swap-files: false
+          
+      # - uses: actions/checkout@v4
+      # -
+      #   name: Set up QEMU
+      #   uses: docker/setup-qemu-action@v3
+
+      # - name: Prep
+      #   run: |
+      #     export LatestArmbianVer=$(gh release list -R armbian/build |grep -v trunk | head -n1 |cut -f1)
+      #     export LatestArmbianURL=https://github.com/armbian/build/archive/refs/tags/${LatestArmbianVer}.tar.gz
+      #     echo LatestArmbianURL=$LatestArmbianURL
+      #     wget -q -nv "$LatestArmbianURL" -O${LatestArmbianVer}.tar.gz
+      #     tar --strip-components=1 -xf ${LatestArmbianVer}.tar.gz
+      #     rm -f ${LatestArmbianVer}.tar.gz
+      #     mkdir release
+
+      # - name: Build imgs
+      #   run: |
+      #     image=${{ matrix.version }}
+      #     sleep $(( RANDOM % 300 ))
+      #     ./compile.sh ${image} || exit 1
+      #     find output -name "*.img" -exec cp -vf {} release/armbian-${image}.img \;
+          
+      # - name: Zip imgs
+      #   run: |
+      #     find release -name "*.img" -exec xz -vz -T0 -1 {} \;
+      #     ls release
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          # files: release/*.img.xz
+          draft: true
+          name: build ${{ github.run_number }}-${{ needs.get_build_date.outputs.build_date }}
+          tag_name: v${{ github.run_number }}
