@@ -75,7 +75,7 @@ jobs:
           find release -name "*.img" -exec xz -vz -T0 -1 {} \;
           ls release
 
-      - name: Release armbian-${{ matrix.device }}-${{ matrix.os }}-${{ matrix.type }}.img
+      - name: Release armbian-${{ matrix.device }}-${{ matrix.os }}-${{ matrix.type }}.img.xz
         uses: softprops/action-gh-release@v2
         with:
           files: release/*.img.xz
