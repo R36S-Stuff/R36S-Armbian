@@ -72,7 +72,7 @@ jobs:
           
       - name: Compress armbian-${{ matrix.device }}-${{ matrix.os }}-${{ matrix.type }}.img
         run: |
-          find release -name "*.img" -exec xz -vz -T0 -1 {} \;
+          find release -name "*.img" -exec xz -vz -T0 -6 --extreme {} \;
           ls release
 
       - name: Release armbian-${{ matrix.device }}-${{ matrix.os }}-${{ matrix.type }}.img
