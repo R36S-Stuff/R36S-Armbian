@@ -10,16 +10,22 @@ jobs:
   get_build_date:
     runs-on: ubuntu-latest
     outputs:
+      build_datedash: ${{ steps.set_date.outputs.datedash }}
       build_date: ${{ steps.set_date.outputs.date }}
     steps:
       - name: Set build date
         id: set_date
-        run: echo "date=$(date +%Y-%m-%d-%H%M%S)" >> $GITHUB_OUTPUT # Generates date in YYYY-MM-DD format and sets it as an output
+        run:  |
+          echo "datedash=$(date +%Y-%m-%d-%H%M%S)" >> $GITHUB_OUTPUT 
+          echo "date=$(echo $datedash | sed 's|\-||g')" >> $GITHUB_OUTPUT 
 
   build:
     strategy:
       matrix:
-        version: [r36s-bookworm-minimal, r36s-jammy-minimal, r36s-noble-minimal, r36s-plucky-minimal, r36s-bookworm-xfce, r36s-jammy-xfce, r36s-noble-xfce, r36s-plucky-xfce]
+        #version: [r36s-bookworm-minimal, r36s-jammy-minimal, r36s-noble-minimal, r36s-plucky-minimal, r36s-bookworm-xfce, r36s-jammy-xfce, r36s-noble-xfce, r36s-plucky-xfce]
+        device: [r36s]
+        os: [bookworm, jammy, noble, plucky]
+        type: [minimal, xfce]
       fail-fast: false
     runs-on: ubuntu-latest
     needs: get_build_date
@@ -57,22 +63,22 @@ jobs:
           rm -f ${LatestArmbianVer}.tar.gz
           mkdir release
 
-      - name: Build imgs
+      - name: Build armbian-${{ matrix.device }}-${{ matrix.os }}-${{ matrix.type }}.img
         run: |
-          image=${{ matrix.version }}
+          image=${{ matrix.device }}-${{ matrix.os }}-${{ matrix.type }}
           sleep $(( RANDOM % 300 ))
           ./compile.sh ${image} || exit 1
           find output -name "*.img" -exec cp -vf {} release/armbian-${image}.img \;
           
-      - name: Zip imgs
+      - name: Compress armbian-${{ matrix.device }}-${{ matrix.os }}-${{ matrix.type }}.img
         run: |
           find release -name "*.img" -exec xz -vz -T0 -1 {} \;
           ls release
 
-      - name: Release
+      - name: Release armbian-${{ matrix.device }}-${{ matrix.os }}-${{ matrix.type }}.img
         uses: softprops/action-gh-release@v2
         with:
           files: release/*.img.xz
           draft: true
-          name: build ${{ github.run_number }}-${{ needs.get_build_date.outputs.build_date }}
-          tag_name: v${{ github.run_number }}
+          name: build ${{ matrix.device }}-${{ needs.get_build_date.outputs.build_datedash }}
+          tag_name: ${{ matrix.device }}-v${{ needs.get_build_date.outputs.build_date }}
